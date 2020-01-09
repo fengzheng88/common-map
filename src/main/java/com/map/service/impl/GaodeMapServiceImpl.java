@@ -1,12 +1,13 @@
 package com.map.service.impl;
 
-import com.map.common.enums.ParamEnumType;
+import com.map.common.enums.ParamEnumTypeEnum;
 import com.map.common.util.CoordinatePointUtil;
-import com.map.pojo.MapQuery;
 import com.map.pojo.CoordinatePoint;
+import com.map.pojo.MapQuery;
 import com.map.pojo.gaode.*;
 import com.map.service.MapService;
 import com.map.service.MapTemplateService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,23 +24,27 @@ import java.util.Map;
 @Service
 public class GaodeMapServiceImpl extends MapTemplateService implements MapService {
 
-    //@Value("baidu.url")
-    private String url_poi = "https://restapi.amap.com/v3/place/around";
-    private String url_transfer = "https://restapi.amap.com/v3/assistant/coordinate/convert";
-    private String url_geocoding = "https://restapi.amap.com/v3/geocode/geo";
-    private String url_reverse_geocoding = "https://restapi.amap.com/v3/geocode/regeo";
+    @Value("${map.gaode.urlPoi}")
+    private String url_poi;
+    @Value("${map.gaode.urlTransfer}")
+    private String url_transfer;
+    @Value("${map.gaode.urlGeocoding}")
+    private String url_geocoding;
+    @Value("${map.gaode.urlReverseGeocoding}")
+    private String url_reverse_geocoding;
 
-    //@Value("baidu.key")
-    private String key = "高德key";
+    @Value("${map.baidu.key}")
+    private String key;
 
     /**
      * 入参地址->gcj02->wgs84
+     *
      * @param query 地址描述
      * @return
      */
     @Override
     public CoordinatePoint transferAddressToGPSPoint(MapQuery query) {
-        Map<ParamEnumType, Object> wgs84ll = this.beforeTransferAddressToGPSPoint(query, null);
+        Map<ParamEnumTypeEnum, Object> wgs84ll = this.beforeTransferAddressToGPSPoint(query, null);
         Object o = doHttpRequest(wgs84ll);
         CoordinatePoint gpsPointDetail = this.afterTransferAddressToGPSPoint(o);
         double[] doubles = CoordinatePointUtil.gcj02_To_Gps84(Double.valueOf(gpsPointDetail.getLatitude()), Double.valueOf(gpsPointDetail.getLongitude()));
@@ -50,6 +55,7 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
 
     /**
      * gps->gcg02
+     *
      * @param query GPS点数据
      * @return
      */
@@ -63,13 +69,14 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
         query.getCoordinatePoint().setLatitude(String.valueOf(doubles[0]));
         query.getCoordinatePoint().setLongitude(String.valueOf(doubles[1]));
 
-        Map<ParamEnumType, Object> wgs84ll = this.beforeTransferGPSPointToAddress(query, null);
+        Map<ParamEnumTypeEnum, Object> wgs84ll = this.beforeTransferGPSPointToAddress(query, null);
         Object o = doHttpRequest(wgs84ll);
         return this.afterTransferGPSPointToAddress(o);
     }
 
     /**
      * gps->gcj02->gps
+     *
      * @param query 查询条件
      * @return
      */
@@ -83,7 +90,7 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
         query.getCoordinatePoint().setLatitude(String.valueOf(doubles[0]));
         query.getCoordinatePoint().setLongitude(String.valueOf(doubles[1]));
 
-        Map<ParamEnumType, Object> wgs84ll = this.beforeGetServiceStationList(query, null);
+        Map<ParamEnumTypeEnum, Object> wgs84ll = this.beforeGetServiceStationList(query, null);
         Object o = doHttpRequest(wgs84ll);
         List<CoordinatePoint> gpsPointList = this.afterGetServiceStationList(o);
         gpsPointList.forEach(x -> {
@@ -110,18 +117,18 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
     }
 
     @Override
-    protected Map<ParamEnumType, Object> beforeGetServiceStationList(MapQuery query, String coordtype) {
+    protected Map<ParamEnumTypeEnum, Object> beforeGetServiceStationList(MapQuery query, String coordtype) {
         if (query == null || query.getCoordinatePoint() == null || StringUtils.isEmpty(query.getQueryName())) {
             throw new RuntimeException("POI查询关键字丶基准点坐标不能为空");
         }
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_poi);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_poi);
         GaodePOIReqPO gaodePOIReqPO = new GaodePOIReqPO();
         gaodePOIReqPO.setKeywords(query.getQueryName());
         gaodePOIReqPO.setRadius(query.getRange());
         String longitude = query.getCoordinatePoint().getLongitude();
         String latitude = query.getCoordinatePoint().getLatitude();
-        if(StringUtils.isEmpty(longitude) || StringUtils.isEmpty(latitude)){
+        if (StringUtils.isEmpty(longitude) || StringUtils.isEmpty(latitude)) {
             throw new RuntimeException("POI查询关键字丶基准点坐标不能为空");
         }
         BigDecimal lngbd = new BigDecimal(longitude);
@@ -129,10 +136,10 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
         BigDecimal latbd = new BigDecimal(latitude);
         latbd = latbd.setScale(6);
 
-        gaodePOIReqPO.setLocation( lngbd + "," + latbd);
+        gaodePOIReqPO.setLocation(lngbd + "," + latbd);
         gaodePOIReqPO.setKey(key);
-        map.put(ParamEnumType.REQUEST, gaodePOIReqPO);
-        map.put(ParamEnumType.RESPONSE, GaodePOIResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, gaodePOIReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, GaodePOIResPO.class);
         return map;
     }
 
@@ -164,24 +171,25 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
 
     /**
      * 正地理编码前置动作
+     *
      * @param query
      * @param coordtype 都为空
      * @return 返回国测gcj02
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeTransferAddressToGPSPoint(MapQuery query, String coordtype) {
+    protected Map<ParamEnumTypeEnum, Object> beforeTransferAddressToGPSPoint(MapQuery query, String coordtype) {
 
         if (query == null || StringUtils.isEmpty(query.getAddress())) {
             throw new RuntimeException("地址不能为空");
         }
 
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_geocoding);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_geocoding);
         GaodeGeocodingReqPO gaodeGeocodingReqPO = new GaodeGeocodingReqPO();
         gaodeGeocodingReqPO.setAddress(query.getAddress());
         gaodeGeocodingReqPO.setKey(key);
-        map.put(ParamEnumType.REQUEST, gaodeGeocodingReqPO);
-        map.put(ParamEnumType.RESPONSE, GaodeGeocodingResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, gaodeGeocodingReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, GaodeGeocodingResPO.class);
         return map;
     }
 
@@ -214,21 +222,21 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
      * @return
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeTransferGPSPointToAddress(MapQuery query, String coordtype) {
+    protected Map<ParamEnumTypeEnum, Object> beforeTransferGPSPointToAddress(MapQuery query, String coordtype) {
 
         if (query == null || query.getCoordinatePoint() == null) {
             throw new RuntimeException("基准点坐标不能为空");
         }
 
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_reverse_geocoding);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_reverse_geocoding);
         GaodeReverseGeocodingReqPO gaodeReverseGeocodingReqPO = new GaodeReverseGeocodingReqPO();
         CoordinatePoint gpsPoint = query.getCoordinatePoint();
         gaodeReverseGeocodingReqPO.setLocation(gpsPoint.getLongitude() + "," + gpsPoint.getLatitude());
         gaodeReverseGeocodingReqPO.setKey(key);
         gaodeReverseGeocodingReqPO.setRadius(query.getRange());
-        map.put(ParamEnumType.REQUEST, gaodeReverseGeocodingReqPO);
-        map.put(ParamEnumType.RESPONSE, GaodeReverseGeocodingResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, gaodeReverseGeocodingReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, GaodeReverseGeocodingResPO.class);
         return map;
     }
 
@@ -269,18 +277,18 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
      * @return
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeTransferPoint(MapQuery query) {
+    protected Map<ParamEnumTypeEnum, Object> beforeTransferPoint(MapQuery query) {
         if (query == null || query.getCoordinatePoint() == null) {
             throw new RuntimeException("基准点坐标不能为空");
         }
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_transfer);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_transfer);
         GaodeTransferReqPO gaodeTransferReqPO = new GaodeTransferReqPO();
         CoordinatePoint gpsPoint = query.getCoordinatePoint();
         gaodeTransferReqPO.setLocations(gpsPoint.getLongitude() + "," + gpsPoint.getLatitude());
         gaodeTransferReqPO.setKey(key);
-        map.put(ParamEnumType.REQUEST, gaodeTransferReqPO);
-        map.put(ParamEnumType.RESPONSE, GaodeTransferResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, gaodeTransferReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, GaodeTransferResPO.class);
 
         return map;
     }

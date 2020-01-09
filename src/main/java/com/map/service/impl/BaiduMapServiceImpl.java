@@ -1,12 +1,13 @@
 package com.map.service.impl;
 
-import com.map.common.enums.ParamEnumType;
+import com.map.common.enums.ParamEnumTypeEnum;
 import com.map.common.util.CoordinatePointUtil;
 import com.map.pojo.MapQuery;
 import com.map.pojo.CoordinatePoint;
 import com.map.pojo.baidu.*;
 import com.map.service.MapService;
 import com.map.service.MapTemplateService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -21,14 +22,17 @@ import java.util.Map;
 @Service
 public class BaiduMapServiceImpl extends MapTemplateService implements MapService {
 
-    //@Value("baidu.url")
-    private String url_poi = "http://api.map.baidu.com/place/v2/search";
-    private String url_transfer = "http://api.map.baidu.com/geoconv/v1/";
-    private String url_geocoding = "http://api.map.baidu.com/geocoding/v3/";
-    private String url_reverse_geocoding = "http://api.map.baidu.com/reverse_geocoding/v3/";
+    @Value("${map.baidu.urlPoi}")
+    private String url_poi;
+    @Value("${map.baidu.urlTransfer}")
+    private String url_transfer;
+    @Value("${map.baidu.urlGeocoding}")
+    private String url_geocoding;
+    @Value("${map.baidu.urlReverseGeocoding}")
+    private String url_reverse_geocoding;
 
-    //@Value("baidu.key")
-    private String key = "百度key";
+    @Value("${map.baidu.key}")
+    private String key;
 
     /**
      * 地址->gps
@@ -38,7 +42,7 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      */
     @Override
     public CoordinatePoint transferAddressToGPSPoint(MapQuery query) {
-        Map<ParamEnumType, Object> wgs84ll = this.beforeTransferAddressToGPSPoint(query, "wgs84ll");
+        Map<ParamEnumTypeEnum, Object> wgs84ll = this.beforeTransferAddressToGPSPoint(query, "wgs84ll");
         Object o = doHttpRequest(wgs84ll);
         return this.afterTransferAddressToGPSPoint(o);
     }
@@ -51,7 +55,7 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      */
     @Override
     public CoordinatePoint transferGPSPointToAddress(MapQuery query) {
-        Map<ParamEnumType, Object> wgs84ll = this.beforeTransferGPSPointToAddress(query, "wgs84ll");
+        Map<ParamEnumTypeEnum, Object> wgs84ll = this.beforeTransferGPSPointToAddress(query, "wgs84ll");
         Object o = doHttpRequest(wgs84ll);
         CoordinatePoint CoordinatePoint = this.afterTransferGPSPointToAddress(o);
         double[] doubles = CoordinatePointUtil.bd09_To_gps84(Double.valueOf(CoordinatePoint.getLatitude()), Double.valueOf(CoordinatePoint.getLongitude()));
@@ -68,7 +72,7 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      */
     @Override
     public List<CoordinatePoint> getServiceStationList(MapQuery query) {
-        Map<ParamEnumType, Object> wgs84ll = this.beforeGetServiceStationList(query, "1");
+        Map<ParamEnumTypeEnum, Object> wgs84ll = this.beforeGetServiceStationList(query, "1");
         Object o = doHttpRequest(wgs84ll);
         List<CoordinatePoint> gpsPointList = this.afterGetServiceStationList(o);
         gpsPointList.forEach(x -> {
@@ -100,20 +104,20 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      * @return
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeGetServiceStationList(MapQuery query, String coordtype) {
+    protected Map<ParamEnumTypeEnum, Object> beforeGetServiceStationList(MapQuery query, String coordtype) {
         if (query == null || query.getCoordinatePoint() == null || StringUtils.isEmpty(query.getQueryName())) {
             throw new RuntimeException("POI查询关键字丶基准点坐标不能为空");
         }
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_poi);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_poi);
         BaiduPOIReqPO baiduPOIReqPO = new BaiduPOIReqPO();
         baiduPOIReqPO.setQuery(query.getQueryName());
         baiduPOIReqPO.setRadius(String.valueOf(query.getRange()));
         baiduPOIReqPO.setLocation(query.getCoordinatePoint().getLatitude() + "," + query.getCoordinatePoint().getLongitude());
         baiduPOIReqPO.setAk(key);
         baiduPOIReqPO.setCoord_type(coordtype);
-        map.put(ParamEnumType.REQUEST, baiduPOIReqPO);
-        map.put(ParamEnumType.RESPONSE, BaiduPOIResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, baiduPOIReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, BaiduPOIResPO.class);
         return map;
     }
 
@@ -147,20 +151,20 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      * @return
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeTransferAddressToGPSPoint(MapQuery query, String coordtype) {
+    protected Map<ParamEnumTypeEnum, Object> beforeTransferAddressToGPSPoint(MapQuery query, String coordtype) {
 
         if (query == null || StringUtils.isEmpty(query.getAddress())) {
             throw new RuntimeException("地址不能为空");
         }
 
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_geocoding);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_geocoding);
         BaiduGeocodingReqPO baiduGeocodingReqPO = new BaiduGeocodingReqPO();
         baiduGeocodingReqPO.setAddress(query.getAddress());
         baiduGeocodingReqPO.setAk(key);
         baiduGeocodingReqPO.setRet_coordtype(coordtype);
-        map.put(ParamEnumType.REQUEST, baiduGeocodingReqPO);
-        map.put(ParamEnumType.RESPONSE, BaiduGeocodingResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, baiduGeocodingReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, BaiduGeocodingResPO.class);
         return map;
     }
 
@@ -192,22 +196,22 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      * @return
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeTransferGPSPointToAddress(MapQuery query, String coordtype) {
+    protected Map<ParamEnumTypeEnum, Object> beforeTransferGPSPointToAddress(MapQuery query, String coordtype) {
 
         if (query == null || query.getCoordinatePoint() == null) {
             throw new RuntimeException("基准点坐标不能为空");
         }
 
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_reverse_geocoding);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_reverse_geocoding);
         BaiduReverseGeocodingReqPO baiduReverseGeocodingReqPO = new BaiduReverseGeocodingReqPO();
         CoordinatePoint gpsPoint = query.getCoordinatePoint();
         baiduReverseGeocodingReqPO.setLocation(gpsPoint.getLatitude() + "," + gpsPoint.getLongitude());
         baiduReverseGeocodingReqPO.setAk(key);
         baiduReverseGeocodingReqPO.setRadius(String.valueOf(query.getRange()));
         baiduReverseGeocodingReqPO.setCoordtype(coordtype);
-        map.put(ParamEnumType.REQUEST, baiduReverseGeocodingReqPO);
-        map.put(ParamEnumType.RESPONSE, BaiduReverseGeocodingResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, baiduReverseGeocodingReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, BaiduReverseGeocodingResPO.class);
         return map;
     }
 
@@ -243,18 +247,18 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
      * @return
      */
     @Override
-    protected Map<ParamEnumType, Object> beforeTransferPoint(MapQuery query) {
+    protected Map<ParamEnumTypeEnum, Object> beforeTransferPoint(MapQuery query) {
         if (query == null || query.getCoordinatePoint() == null) {
             throw new RuntimeException("基准点坐标不能为空");
         }
-        Map<ParamEnumType, Object> map = new HashMap<>();
-        map.put(ParamEnumType.URL, url_transfer);
+        Map<ParamEnumTypeEnum, Object> map = new HashMap<>();
+        map.put(ParamEnumTypeEnum.URL, url_transfer);
         BaiduTransferReqPO baiduTransferReqPO = new BaiduTransferReqPO();
         CoordinatePoint gpsPoint = query.getCoordinatePoint();
         baiduTransferReqPO.setCoords(gpsPoint.getLongitude() + "," + gpsPoint.getLatitude());
         baiduTransferReqPO.setAk(key);
-        map.put(ParamEnumType.REQUEST, baiduTransferReqPO);
-        map.put(ParamEnumType.RESPONSE, BaiduTransferResPO.class);
+        map.put(ParamEnumTypeEnum.REQUEST, baiduTransferReqPO);
+        map.put(ParamEnumTypeEnum.RESPONSE, BaiduTransferResPO.class);
 
         return map;
     }

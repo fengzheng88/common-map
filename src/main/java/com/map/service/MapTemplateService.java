@@ -1,6 +1,6 @@
 package com.map.service;
 
-import com.map.common.enums.ParamEnumType;
+import com.map.common.enums.ParamEnumTypeEnum;
 import com.map.common.util.HttpClientUtil;
 import com.map.pojo.MapQuery;
 import com.map.pojo.CoordinatePoint;
@@ -16,7 +16,7 @@ public abstract class MapTemplateService implements MapService {
     @Override
     public CoordinatePoint transferAddressToXPoint(MapQuery query) {
         //query = getCoordinateTransfer(query);
-        Map<ParamEnumType, Object> addressTOPointMap = this.beforeTransferAddressToGPSPoint(query, null);
+        Map<ParamEnumTypeEnum, Object> addressTOPointMap = this.beforeTransferAddressToGPSPoint(query, null);
         Object address2PointObj = doHttpRequest(addressTOPointMap);
         return afterTransferAddressToGPSPoint(address2PointObj);
     }
@@ -24,7 +24,7 @@ public abstract class MapTemplateService implements MapService {
     @Override
     public CoordinatePoint transferXPointToAddress(MapQuery query) {
         //query = getCoordinateTransfer(query);
-        Map<ParamEnumType, Object> addressTOPointMap = this.beforeTransferGPSPointToAddress(query, null);
+        Map<ParamEnumTypeEnum, Object> addressTOPointMap = this.beforeTransferGPSPointToAddress(query, null);
         Object obj = doHttpRequest(addressTOPointMap);
         return afterTransferGPSPointToAddress(obj);
     }
@@ -32,7 +32,7 @@ public abstract class MapTemplateService implements MapService {
     @Override
     public List<CoordinatePoint> getServiceStationListByX(MapQuery query) {
         //query = getCoordinateTransfer(query);
-        Map<ParamEnumType, Object> addressTOPointMap = this.beforeGetServiceStationList(query, null);
+        Map<ParamEnumTypeEnum, Object> addressTOPointMap = this.beforeGetServiceStationList(query, null);
         Object obj = doHttpRequest(addressTOPointMap);
         return afterGetServiceStationList(obj);
     }
@@ -44,7 +44,7 @@ public abstract class MapTemplateService implements MapService {
      * @param query
      * @return
      */
-    protected abstract Map<ParamEnumType, Object> beforeGetServiceStationList(MapQuery query, String coordtype);
+    protected abstract Map<ParamEnumTypeEnum, Object> beforeGetServiceStationList(MapQuery query, String coordtype);
 
     /**
      * 获取POI点后置动作
@@ -62,7 +62,7 @@ public abstract class MapTemplateService implements MapService {
      */
     private MapQuery getCoordinateTransfer(MapQuery query) {
         if (needTransfer()) {
-            Map<ParamEnumType, Object> enumTypeObjectMap = this.beforeTransferPoint(query);
+            Map<ParamEnumTypeEnum, Object> enumTypeObjectMap = this.beforeTransferPoint(query);
             Object o = doHttpRequest(enumTypeObjectMap);
             query = afterTransferPoint(query, o);
         }
@@ -75,7 +75,7 @@ public abstract class MapTemplateService implements MapService {
      * @param query
      * @return
      */
-    protected abstract Map<ParamEnumType, Object> beforeTransferAddressToGPSPoint(MapQuery query, String coordtype);
+    protected abstract Map<ParamEnumTypeEnum, Object> beforeTransferAddressToGPSPoint(MapQuery query, String coordtype);
 
     /**
      * 正地理编码后置动作
@@ -91,7 +91,7 @@ public abstract class MapTemplateService implements MapService {
      * @param query
      * @return
      */
-    protected abstract Map<ParamEnumType, Object> beforeTransferGPSPointToAddress(MapQuery query, String coordtype);
+    protected abstract Map<ParamEnumTypeEnum, Object> beforeTransferGPSPointToAddress(MapQuery query, String coordtype);
 
     /**
      * 逆地理位置后置动作
@@ -107,7 +107,7 @@ public abstract class MapTemplateService implements MapService {
      * @param query
      * @return
      */
-    protected abstract Map<ParamEnumType, Object> beforeTransferPoint(MapQuery query);
+    protected abstract Map<ParamEnumTypeEnum, Object> beforeTransferPoint(MapQuery query);
 
     /**
      * 坐标转换后置动作
@@ -118,8 +118,8 @@ public abstract class MapTemplateService implements MapService {
      */
     protected abstract MapQuery afterTransferPoint(MapQuery query, Object o);
 
-    public Object doHttpRequest(Map<ParamEnumType, Object> map) {
-        return HttpClientUtil.doGet((String) map.get(ParamEnumType.URL), map.get(ParamEnumType.REQUEST), (Class) map.get(ParamEnumType.RESPONSE));
+    public Object doHttpRequest(Map<ParamEnumTypeEnum, Object> map) {
+        return HttpClientUtil.doGet((String) map.get(ParamEnumTypeEnum.URL), map.get(ParamEnumTypeEnum.REQUEST), (Class) map.get(ParamEnumTypeEnum.RESPONSE));
     }
 
     /**

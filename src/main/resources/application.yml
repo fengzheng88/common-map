@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: common-map
+server:
+  port: 8080
+
+
+map:
+  baidu:
+    urlPoi: http://api.map.baidu.com/place/v2/search
+    urlTransfer: http://api.map.baidu.com/geoconv/v1/
+    urlGeocoding: http://api.map.baidu.com/geocoding/v3/
+    urlReverseGeocoding: http://api.map.baidu.com/reverse_geocoding/v3/
+    key: yourkey
+  gaode:
+    urlPoi: http://api.map.baidu.com/place/v2/search
+    urlTransfer: http://api.map.baidu.com/geoconv/v1/
+    urlGeocoding: http://api.map.baidu.com/geocoding/v3/
+    urlReverseGeocoding: http://api.map.baidu.com/reverse_geocoding/v3/
+    key: yourkey
+  coordType: BAIDU

@@ -19,3 +19,16 @@ map:
     urlReverseGeocoding: https://restapi.amap.com/v3/geocode/regeo
     key: gaodekey
   coordinateType: BAIDU
+  # 比较优的写法 @see com.map.common.config.MapConfig
+  baidu-map-config:
+    url_poi: http://api.map.baidu.com/place/v2/search
+    urlTransfer: http://api.map.baidu.com/geoconv/v1/
+    urlGeocoding: http://api.map.baidu.com/geocoding/v3/
+    urlReverseGeocoding: http://api.map.baidu.com/reverse_geocoding/v3/
+    key: baidukey
+  gaode-map-config:
+    urlPoi: https://restapi.amap.com/v3/place/around
+    urlTransfer: https://restapi.amap.com/v3/assistant/coordinate/convert
+    urlGeocoding: https://restapi.amap.com/v3/geocode/geo
+    urlReverseGeocoding: https://restapi.amap.com/v3/geocode/regeo
+    key: gaodekey

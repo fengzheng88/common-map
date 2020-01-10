@@ -1,5 +1,6 @@
 package com.map.service.impl;
 
+import com.map.common.config.MapConfig;
 import com.map.common.enums.ParamEnumTypeEnum;
 import com.map.common.util.CoordinatePointUtil;
 import com.map.pojo.MapQuery;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,10 @@ import java.util.Map;
 @Service
 public class BaiduMapServiceImpl extends MapTemplateService implements MapService {
 
+    /**
+     * 以下@Value可以用MapConfig替换
+     * @see com.map.common.config.MapConfig
+     */
     @Value("${map.baidu.urlPoi}")
     private String url_poi;
     @Value("${map.baidu.urlTransfer}")
@@ -33,6 +40,19 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
 
     @Value("${map.baidu.key}")
     private String key;
+
+    @Resource
+    MapConfig mapConfig;
+
+    @PostConstruct
+    public void init(){
+        System.out.println(mapConfig.getCoordinateType());
+        System.out.println(mapConfig.getBaiduMapConfig().getKey());
+        System.out.println(mapConfig.getBaiduMapConfig().getUrlGeocoding());
+        System.out.println(mapConfig.getBaiduMapConfig().getUrlPoi());
+        System.out.println(mapConfig.getBaiduMapConfig().getUrlReverseGeocoding());
+        System.out.println(mapConfig.getBaiduMapConfig().getUrlTransfer());
+    }
 
     /**
      * 地址->gps

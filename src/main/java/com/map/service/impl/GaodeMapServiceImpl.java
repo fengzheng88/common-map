@@ -33,7 +33,7 @@ public class GaodeMapServiceImpl extends MapTemplateService implements MapServic
     @Value("${map.gaode.urlReverseGeocoding}")
     private String url_reverse_geocoding;
 
-    @Value("${map.baidu.key}")
+    @Value("${map.gaode.key}")
     private String key;
 
     /**

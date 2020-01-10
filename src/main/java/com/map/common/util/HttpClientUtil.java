@@ -59,7 +59,7 @@ public class HttpClientUtil {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
                 HttpEntity resEntity = response.getEntity();
-                result = URLDecoder.decode(EntityUtils.toString(resEntity), "UTF-8");
+                result = URLDecoder.decode(EntityUtils.toString(resEntity, "UTF-8"), "UTF-8");
             } else {
                 throw new IllegalStateException("Method failed: " + response.getStatusLine());
             }

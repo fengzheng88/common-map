@@ -32,3 +32,19 @@ map:
     urlGeocoding: https://restapi.amap.com/v3/geocode/geo
     urlReverseGeocoding: https://restapi.amap.com/v3/geocode/regeo
     key: gaodekey
+
+map2:
+  coordinateType: BAIDU
+  # 比较优的写法 @see com.map.common.config.MapConfig
+  baidu-map-config:
+    url_poi: test1
+    urlTransfer: test2
+    urlGeocoding: test3
+    urlReverseGeocoding: test4
+    key: baidukey
+  gaode-map-config:
+    urlPoi: test5
+    urlTransfer: test6
+    urlGeocoding: test7
+    urlReverseGeocoding: test8
+    key: gaodekey

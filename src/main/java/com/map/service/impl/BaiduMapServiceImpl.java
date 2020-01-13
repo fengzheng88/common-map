@@ -1,6 +1,7 @@
 package com.map.service.impl;
 
 import com.map.common.config.MapConfig;
+import com.map.common.config.MapConfig2;
 import com.map.common.enums.ParamEnumTypeEnum;
 import com.map.common.util.CoordinatePointUtil;
 import com.map.pojo.MapQuery;
@@ -44,6 +45,9 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
     @Resource
     MapConfig mapConfig;
 
+    @Resource
+    MapConfig2 mapConfig2;
+
     @PostConstruct
     public void init(){
         System.out.println(mapConfig.getCoordinateType());
@@ -52,6 +56,14 @@ public class BaiduMapServiceImpl extends MapTemplateService implements MapServic
         System.out.println(mapConfig.getBaiduMapConfig().getUrlPoi());
         System.out.println(mapConfig.getBaiduMapConfig().getUrlReverseGeocoding());
         System.out.println(mapConfig.getBaiduMapConfig().getUrlTransfer());
+
+        System.out.println("=========================================================");
+        System.out.println(mapConfig2.getCoordinateType());
+        System.out.println(mapConfig2.getBaiduMapConfig().getKey());
+        System.out.println(mapConfig2.getBaiduMapConfig().getUrlGeocoding());
+        System.out.println(mapConfig2.getBaiduMapConfig().getUrlPoi());
+        System.out.println(mapConfig2.getBaiduMapConfig().getUrlReverseGeocoding());
+        System.out.println(mapConfig2.getBaiduMapConfig().getUrlTransfer());
     }
 
     /**
